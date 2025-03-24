@@ -11,6 +11,8 @@ import './status-bar.dart';
 import '../../entered.dart';
 
 class Training extends StatefulWidget {
+  const Training({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _Training();
@@ -21,11 +23,11 @@ class _Training extends State<Training> {
   /* List<Map> values = []; */
   List<Entered> values = [];
   int points = 0;
-  DateTime latestValueTime = null;
+  DateTime? latestValueTime;
   String streakId = 'id';
   int errors = 0;
   int streak = 0;
-  Timer timer;
+  Timer? timer;
   int topResults = 0;
   int topStreak = 0;
   int topPoints = 0;
@@ -49,38 +51,39 @@ class _Training extends State<Training> {
 
   String _randomString(int length) {
     var rand = Random();
-    var codeUnits = new List.generate(length, (index) {
+    var codeUnits = List.generate(length, (index) {
       return rand.nextInt(33) + 89;
     });
 
-    return new String.fromCharCodes(codeUnits);
+    return String.fromCharCodes(codeUnits);
   }
 
   void reCalculateValues() {
     int index = 0;
-    this.values = this.values.map((Entered value) {
-      if (value.isAfter(value.timeNow)) {
-        var currentId = value.streakId;
-        if (index - 1 != -1) {
-          var prev = this.values[index - 1];
-          var prevId = prev.streakId;
-          var prevCorrect = prev.isCorrect;
-          if (prevId == currentId && value.isCorrect && prevCorrect) {
-            value.isOnStreak = true;
+    values =
+        values.map((Entered value) {
+          if (value.isAfter(value.timeNow)) {
+            var currentId = value.streakId;
+            if (index - 1 != -1) {
+              var prev = values[index - 1];
+              var prevId = prev.streakId;
+              var prevCorrect = prev.isCorrect;
+              if (prevId == currentId && value.isCorrect && prevCorrect) {
+                value.isOnStreak = true;
+              }
+            }
+            if (index + 1 <= values.length - 1) {
+              var next = values[index + 1];
+              var nextId = next.streakId;
+              var nextCorrect = next.isCorrect;
+              if (nextId == currentId && value.isCorrect && nextCorrect) {
+                value.isOnStreak = true;
+              }
+            }
           }
-        }
-        if (index + 1 <= this.values.length - 1) {
-          var next = this.values[index + 1];
-          var nextId = next.streakId;
-          var nextCorrect = next.isCorrect;
-          if (nextId == currentId && value.isCorrect && nextCorrect) {
-            value.isOnStreak = true;
-          }
-        }
-      }
-      index += 1;
-      return value;
-    }).toList();
+          index += 1;
+          return value;
+        }).toList();
   }
 
   int getStreakPoint(int streak) {
@@ -94,22 +97,22 @@ class _Training extends State<Training> {
   List<int> getLongestStreak(List<Entered> values) {
     int index = 0;
 
-  	int longestStreakStartPosition = -1;
-  	int longestStreakEndPosition = -1;
-  	int longestStreakLength = 0;
+    int longestStreakStartPosition = -1;
+    int longestStreakEndPosition = -1;
+    int longestStreakLength = 0;
 
-  	bool isCurrentrlyOnStreak = false;
-  	int currentStreakStartPosition = -1;
-  	int currentStreakEndPosition = -1;
-  	int currentStreakLength = 0;
-  	values.forEach((Entered current) {
+    bool isCurrentrlyOnStreak = false;
+    int currentStreakStartPosition = -1;
+    int currentStreakEndPosition = -1;
+    int currentStreakLength = 0;
+    for (var current in values) {
       // is not first value
       if (index == 0 && values.length > 1) {
-      	Entered next = values[index + 1];
+        Entered next = values[index + 1];
         if (current.isSameStreakId(next)) {
           // should always be false bu hwo knows..
-        	if (!isCurrentrlyOnStreak) {
-          	isCurrentrlyOnStreak = true;
+          if (!isCurrentrlyOnStreak) {
+            isCurrentrlyOnStreak = true;
             currentStreakStartPosition = index;
             currentStreakLength += 1;
           }
@@ -119,33 +122,32 @@ class _Training extends State<Training> {
         if (current.isSameStreakId(prevoius)) {
           // is first value of streak
           if (!isCurrentrlyOnStreak) {
-          	isCurrentrlyOnStreak = true;
+            isCurrentrlyOnStreak = true;
             currentStreakStartPosition = index;
           }
 
           currentStreakLength += 1;
         } else {
           if (isCurrentrlyOnStreak) {
-          	isCurrentrlyOnStreak = false;
-          	currentStreakEndPosition = index;
+            isCurrentrlyOnStreak = false;
+            currentStreakEndPosition = index;
 
             if (currentStreakLength > longestStreakLength) {
               longestStreakLength = currentStreakLength;
 
               longestStreakStartPosition = currentStreakStartPosition;
-  						longestStreakEndPosition = currentStreakEndPosition;
+              longestStreakEndPosition = currentStreakEndPosition;
 
               currentStreakLength = 0;
               currentStreakStartPosition = -1;
               currentStreakEndPosition = -1;
             }
           }
-
         }
       }
 
       // is on streak for last value
-      if (index == values.length -1) {
+      if (index == values.length - 1) {
         if (isCurrentrlyOnStreak) {
           isCurrentrlyOnStreak = false;
           currentStreakEndPosition = index;
@@ -164,7 +166,7 @@ class _Training extends State<Training> {
       }
 
       index += 1;
-    });
+    }
 
     if (longestStreakStartPosition != 0) {
       longestStreakLength += 1;
@@ -172,17 +174,17 @@ class _Training extends State<Training> {
       longestStreakEndPosition -= 1;
     }
 
-		return [
+    return [
       longestStreakLength,
       longestStreakStartPosition,
-      longestStreakEndPosition
+      longestStreakEndPosition,
     ];
   }
 
   int getResult(List<Entered> values) {
     int index = 0;
-    for(final value in this.values){
-      if (!value.isCorrect){
+    for (final value in this.values) {
+      if (!value.isCorrect) {
         break;
       }
       index += 1;
@@ -199,13 +201,18 @@ class _Training extends State<Training> {
       await prefs.setInt('topResult', newResult);
       if (state) {
         setState(() {
-          this.topResults = newResult;
+          topResults = newResult;
         });
       }
     }
   }
 
-  void saveTopStreak(int newStreak, int start, int end, {bool state = true}) async {
+  void saveTopStreak(
+    int newStreak,
+    int start,
+    int end, {
+    bool state = true,
+  }) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int topStreak = (prefs.getInt('topStreak') ?? 0);
 
@@ -239,7 +246,7 @@ class _Training extends State<Training> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int value = (prefs.getInt('topResult') ?? 0);
     setState(() {
-      this.topStreak = value;
+      topStreak = value;
     });
   }
 
@@ -247,7 +254,7 @@ class _Training extends State<Training> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int value = (prefs.getInt('topStreak') ?? 0);
     setState(() {
-      this.topStreak = value;
+      topStreak = value;
     });
   }
 
@@ -255,7 +262,7 @@ class _Training extends State<Training> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int value = (prefs.getInt('topPoints') ?? 0);
     setState(() {
-      this.topPoints = value;
+      topPoints = value;
     });
   }
 
@@ -263,106 +270,111 @@ class _Training extends State<Training> {
   void dispose() {
     super.dispose();
 
-    var streakData = getLongestStreak(this.values);
+    var streakData = getLongestStreak(values);
     int streakLength = streakData[0];
     int streakStartPosition = streakData[1];
     int streakEndPosition = streakData[2];
-    int result = getResult(this.values);
+    int result = getResult(values);
 
-    if (streakLength > this.topStreak) {
-      saveTopStreak(streakLength, streakStartPosition, streakEndPosition, state: false);
+    if (streakLength > topStreak) {
+      saveTopStreak(
+        streakLength,
+        streakStartPosition,
+        streakEndPosition,
+        state: false,
+      );
     }
-    if (result > this.topResults) {
+    if (result > topResults) {
       saveRecordLength(result, state: false);
     }
 
-    if (this.points > this.topPoints) {
-      saveTopPoints(this.points, state: false);
+    if (points > topPoints) {
+      saveTopPoints(points, state: false);
     }
   }
 
   void onPress(String value) {
     if (value == 'CLEAR') {
       setState(() {
-        if (this.values.length > 1) {
-          var streakData = getLongestStreak(this.values);
+        if (values.length > 1) {
+          var streakData = getLongestStreak(values);
           int streakLength = streakData[0];
           int streakStartPosition = streakData[1];
           int streakEndPosition = streakData[2];
-          int result = getResult(this.values);
+          int result = getResult(values);
 
-          if (streakLength > this.topStreak) {
+          if (streakLength > topStreak) {
             saveTopStreak(streakLength, streakStartPosition, streakEndPosition);
           }
-          if (result > this.topResults) {
+          if (result > topResults) {
             saveRecordLength(result);
           }
 
-          if (this.points > this.topPoints) {
-            saveTopPoints(this.points);
+          if (points > topPoints) {
+            saveTopPoints(points);
           }
         }
 
-        this.points = 0;
-        this.errors = 0;
-        this.values.clear();
-        this.streak = 0;
-        this.streakId = this._randomString(10);
-        this.latestValueTime = null;
-        if (this.timer != null) {
-          this.timer.cancel();
+        points = 0;
+        errors = 0;
+        values.clear();
+        streak = 0;
+        streakId = _randomString(10);
+        latestValueTime = null;
+        if (timer != null) {
+          timer?.cancel();
         }
       });
     } else {
       setState(() {
-        var isCorrect = this.isCorrect(this.values.length, value);
+        var isCorrect = this.isCorrect(values.length, value);
         if (!isCorrect) {
-          this.errors = this.errors + 1;
-          this.streakId = this._randomString(10);
-          this.latestValueTime = null;
-          this.reCalculateValues();
-          if (this.timer != null) {
-            if (this.streak > 1) {
-              this.points += getStreakPoint(this.streak);
+          errors = errors + 1;
+          streakId = _randomString(10);
+          latestValueTime = null;
+          reCalculateValues();
+          if (timer != null) {
+            if (streak > 1) {
+              points += getStreakPoint(streak);
             }
-            this.timer.cancel();
+            timer?.cancel();
           }
-          this.streak = 0;
+          streak = 0;
         } else {
-          this.points += 1;
+          points += 1;
         }
 
         var timeNow = DateTime.now();
-        var time = latestValueTime == null ? DateTime.now() : latestValueTime;
+        var time = latestValueTime ?? DateTime.now();
         var plusFive = time.add(Duration(milliseconds: 400));
         if (isCorrect) {
           if (plusFive.isBefore(timeNow)) {
-            if (this.timer != null) {
-              this.timer.cancel();
+            if (timer != null) {
+              timer?.cancel();
             }
-            this.latestValueTime = DateTime.now();
+            latestValueTime = DateTime.now();
             plusFive = DateTime.now();
-            this.streakId = this._randomString(10);
-            if (this.streak > 1) {
-              this.points += getStreakPoint(this.streak);
+            streakId = _randomString(10);
+            if (streak > 1) {
+              points += getStreakPoint(streak);
             }
-            this.streak = 1;
-            this.reCalculateValues();
+            streak = 1;
+            reCalculateValues();
           } else {
-            this.streak = this.streak + 1;
+            streak = streak + 1;
 
-            if (this.timer != null) {
-              this.timer.cancel();
+            if (timer != null) {
+              timer?.cancel();
             }
-            this.timer = Timer(new Duration(seconds: 1), () {
+            timer = Timer(Duration(seconds: 1), () {
               setState(() {
-                if (this.streak > 1) {
-                  this.points += getStreakPoint(this.streak);
+                if (streak > 1) {
+                  points += getStreakPoint(streak);
                 }
-                this.streak = 0;
-                this.streakId = this._randomString(10);
-                this.reCalculateValues();
-                this.latestValueTime = null;
+                streak = 0;
+                streakId = _randomString(10);
+                reCalculateValues();
+                latestValueTime = null;
               });
             });
           }
@@ -373,13 +385,13 @@ class _Training extends State<Training> {
           inputTime: plusFive,
           timeNow: timeNow,
           isCorrect: isCorrect,
-          streakId: this.streakId,
-          position: this.values.length,
-          correctValue: getCorrectPi(this.values.length),
+          streakId: streakId,
+          position: values.length,
+          correctValue: getCorrectPi(values.length),
         );
 
-        this.values.add(entered);
-        this.latestValueTime = DateTime.now();
+        values.add(entered);
+        latestValueTime = DateTime.now();
       });
     }
   }
@@ -387,29 +399,25 @@ class _Training extends State<Training> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
-      children: <Widget>[
-        Expanded(
-          child: Presenter(
-              streak: this.streak,
-              values: this.values,
-              errors: this.errors,
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: Presenter(streak: streak, values: values, errors: errors),
             ),
+            StatusBar(
+              errors: errors,
+              points: points,
+              digits: values.length,
+              streak: streak,
+            ),
+            Expanded(
+              flex: 0,
+              child: Pad(onPress: onPress, disableClear: streak > 2),
+            ),
+          ],
         ),
-        StatusBar(
-          errors: this.errors,
-          points: this.points,
-          digits: this.values.length,
-          streak: this.streak,
-        ),
-        Expanded(
-          flex: 0,
-          child: Pad(
-            onPress: this.onPress,
-            disableClear: this.streak > 2,
-          ),
-        ),
-      ],
-    ));
+      ),
+    );
   }
 }

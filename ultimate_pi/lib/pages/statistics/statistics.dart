@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:share/share.dart';
-
 
 class Stats extends StatelessWidget {
   final int data;
   final String title;
 
-  Stats({
-    @required this.data,
-    @required this.title
-  });
+  Stats({required this.data, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -20,29 +16,21 @@ class Stats extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          Text(this.data.toString(),
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 70.0
-            )
+          Text(
+            this.data.toString(),
+            style: TextStyle(color: Colors.white, fontSize: 70.0),
           ),
           Container(
             padding: const EdgeInsets.only(top: 8.0),
-            child: Text(this.title,
-              style: TextStyle(
-                color: Colors.white,
-              )
-            )
-          )
+            child: Text(this.title, style: TextStyle(color: Colors.white)),
+          ),
         ],
-      )
+      ),
     );
   }
 }
 
-
 class Statistics extends StatefulWidget {
-
   @override
   State<StatefulWidget> createState() {
     return _Statistics();
@@ -89,47 +77,39 @@ class _Statistics extends State<Statistics> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.white,
         onPressed: () {
           int total = this.total;
-          int point = this.points;
-          int combo = this.streak;
-          Share.share('I know $total decimals of π!! and i got a score of $point with my longest combo $combo, crush my score here: https://goo.gl/J6YaVm');
+          int point = points;
+          int combo = streak;
+          Share.share(
+            'I know $total decimals of π!! and i got a score of $point with my longest combo $combo, crush my score here: https://goo.gl/J6YaVm',
+          );
         },
-        child: new IconTheme(
-          data: new IconThemeData(
-            color: Colors.black
-          ),
-          child: new Icon(Icons.share),
+        child: IconTheme(
+          data: IconThemeData(color: Colors.black),
+          child: Icon(Icons.share),
         ),
       ),
       appBar: AppBar(
-          title: Text('STATISTICS'),
-        ),
-      body: Container(
-        child: Column(
+        backgroundColor: Colors.black,
+        title: Text('STATISTICS', style: TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Column(
         children: <Widget>[
+          Expanded(child: Stats(data: points, title: 'POINTS')),
+          Expanded(child: Stats(data: total, title: 'DECIMALS')),
           Expanded(
             child: Stats(
-              data: this.points,
-              title: 'POINTS',
-            )
-          ),
-          Expanded(
-            child: Stats(
-              data: this.total,
-              title: 'DECIMALS',
-            )
-          ),
-          Expanded(
-            child: Stats(
-              data: this.streak,
+              data: streak,
               title: '️️️️️️️😍❗️️ LONGEST COMBO 👌🍌',
             ),
           ),
         ],
-      ))
+      ),
     );
   }
 }

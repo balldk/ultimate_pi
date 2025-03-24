@@ -7,4 +7,5 @@ I created [this react native pi training app](https://github.com/richie-south/pi
 Anyway you can [try the app here](https://play.google.com/store/apps/details?id=com.richardsoderman.ultimatepi)
 
 ## gif
-<img src="https://github.com/richie-south/ultimate_pi/blob/master/app.gif" width="360">
+
+<img src="app.gif" width="360">
